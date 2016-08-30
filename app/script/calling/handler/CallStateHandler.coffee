@@ -71,10 +71,10 @@ class z.calling.handler.CallStateHandler
   @param conversation_id [String] Conversation ID
   ###
   check_state: (conversation_id) =>
-    conversation_et = @call_center.conversation_repository.get_conversation_by_id conversation_id
-    return if not conversation_et? or conversation_et.removed_from_conversation()
-
-    @_is_call_ongoing conversation_id
+    @call_center.conversation_repository.get_conversation_by_id conversation_id
+    .then (conversation_et) =>
+      if not conversation_et.removed_from_conversation()
+        return @_is_call_ongoing conversation_id
     .then ([is_call_ongoing, response]) =>
       if is_call_ongoing
         @on_call_state @_fake_on_state_event(response, conversation_id), true
@@ -371,12 +371,13 @@ class z.calling.handler.CallStateHandler
       if call_state is z.calling.enum.CallState.OUTGOING and not z.calling.CallCenter.supports_calling()
         amplify.publish z.event.WebApp.WARNING.SHOW, z.ViewModel.WarningType.UNSUPPORTED_OUTGOING_CALL
       else
-        @call_center.conversation_repository.get_conversation_by_id conversation_id, (conversation_et) =>
-          @_check_concurrent_joined_call conversation_id, call_state
-          .then =>
-            return @_join_call conversation_id, is_videod
-          .then ->
-            if call_state is z.calling.enum.CallState.OUTGOING
+        return @_check_concurrent_joined_call conversation_id, call_state
+        .then =>
+          return @_join_call conversation_id, is_videod
+        .then ->
+          if call_state is z.calling.enum.CallState.OUTGOING
+            @call_center.conversation_repository.get_conversation_by_id conversation_id
+            .then (conversation_et) ->
               amplify.publish z.event.WebApp.ANALYTICS.EVENT, z.tracking.SessionEventName.INTEGER.VOICE_CALL_INITIATED
               media_action = if is_videod then 'audio_call' else 'video_call'
               amplify.publish z.event.WebApp.ANALYTICS.EVENT, z.tracking.EventName.MEDIA.COMPLETED_MEDIA_ACTION, {
@@ -384,7 +385,7 @@ class z.calling.handler.CallStateHandler
                 conversation_type: z.tracking.helpers.get_conversation_type conversation_et
                 with_bot: conversation_et.is_with_bot()
               }
-        return true
+          return true
 
   ###
   User action to leave a call.
@@ -593,15 +594,16 @@ class z.calling.handler.CallStateHandler
       @logger.log @logger.levels.WARN, "Call entity for '#{event.conversation}' already exists", call_et
       return call_et
     .catch =>
-      conversation_et = @call_center.conversation_repository.get_conversation_by_id event.conversation
-      call_et = new z.calling.entities.Call conversation_et, @call_center.user_repository.self(), @call_center.telemetry
-      call_et.local_audio_stream = @call_center.media_stream_handler.local_media_streams.audio
-      call_et.local_video_stream = @call_center.media_stream_handler.local_media_streams.video
-      call_et.session_id event.session or @_fake_session_id()
-      call_et.event_sequence = event.sequence
-      conversation_et.call call_et
-      @calls.push call_et
-      return call_et
+      return @call_center.conversation_repository.get_conversation_by_id event.conversation
+      .then (conversation_et) =>
+        call_et = new z.calling.entities.Call conversation_et, @call_center.user_repository.self(), @call_center.telemetry
+        call_et.local_audio_stream = @call_center.media_stream_handler.local_media_streams.audio
+        call_et.local_video_stream = @call_center.media_stream_handler.local_media_streams.video
+        call_et.session_id event.session or @_fake_session_id()
+        call_et.event_sequence = event.sequence
+        conversation_et.call call_et
+        @calls.push call_et
+        return call_et
 
   ###
   Constructs an incoming call entity.
