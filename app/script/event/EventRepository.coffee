@@ -341,10 +341,6 @@ class z.event.EventRepository
     .then (saved_event) =>
       @_distribute_event saved_event
       return saved_event
-    .catch (error) ->
-      if error.type is z.cryptography.CryptographyError::TYPE.PREVIOUSLY_STORED
-        return true
-      throw error
 
   ###
   Handle all events from the payload of an incoming notification.
@@ -352,26 +348,13 @@ class z.event.EventRepository
   @return [String] ID of the handled notification
   ###
   _handle_notification: (notification) =>
-    return new Promise (resolve, reject) =>
-      events = notification.payload
-      source = switch @notification_handling_state()
-        when z.event.NotificationHandlingState.WEB_SOCKET
-          @NOTIFICATION_SOURCE.WEB_SOCKET
-        else
-          @NOTIFICATION_SOURCE.STREAM
-
-      @logger.log @logger.levels.INFO,
-        "Handling notification '#{notification.id}' from '#{source}' containing '#{events.length}' events", notification
-
-      if events.length is 0
-        @logger.log @logger.levels.WARN, 'Notification payload does not contain any events'
-        @last_notification_id notification.id
-        resolve @last_notification_id()
-      else
-        Promise.all (@_handle_event event for event in events)
-        .then =>
-          @last_notification_id notification.id
-          resolve @last_notification_id()
-        .catch (error) =>
-          @logger.log @logger.levels.ERROR, "Failed to handle notification '#{notification.id}' from '#{source}': #{error.message}", error
-          reject error
+    Promise.resolve notification.payload
+    .then (events) =>
+      if events.length > 0
+        return Promise.all (@_handle_event event for event in events)
+      @logger.log @logger.levels.WARN, 'Notification payload does not contain any events'
+    .then =>
+      @last_notification_id notification.id
+      return @last_notification_id()
+    .catch (error) ->
+      throw new Error "Failed to handle notification '#{notification.id}' with error #{error.message}"

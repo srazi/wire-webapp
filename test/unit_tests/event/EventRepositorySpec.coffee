@@ -90,12 +90,15 @@ describe 'Event Repository', ->
       expect(event_repository.web_socket_buffer.length).toBe 1
 
     it 'should handle buffered notifications after notifications stream was processed', (done) ->
+      console.log 'should handle buffered notifications after notifications stream was processed'
       last_notification_id = z.util.create_random_uuid()
       last_published_notification_id = z.util.create_random_uuid()
       event_repository.last_notification_id last_notification_id
       event_repository.connect_web_socket()
-      websocket_service_mock.publish {id: z.util.create_random_uuid(), payload: []}
 
+      console.log 'PUSH'
+      websocket_service_mock.publish {id: z.util.create_random_uuid(), payload: []}
+      console.log 'PUSH ', last_published_notification_id
       websocket_service_mock.publish {id: last_published_notification_id, payload: []}
       event_repository.update_from_notification_stream()
       .then () ->

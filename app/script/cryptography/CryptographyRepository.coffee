@@ -469,80 +469,77 @@ class z.cryptography.CryptographyRepository
   @return [cryptobox.CryptoboxSession, z.proto.GenericMessage] Cryptobox session along with the decrypted message in ProtocolBuffer format
   ###
   decrypt_event: (event) =>
-    return new Promise (resolve, reject) =>
-      if not event.data
-        @logger.log @logger.levels.ERROR, "Encrypted event with ID '#{event.id}' does not contain its data payload", event
-        reject new z.cryptography.CryptographyError z.cryptography.CryptographyError::TYPE.NO_DATA_CONTENT
+    Promise.resolve()
+    .then ->
+      ciphertext = event.data.key or event.data.text
+      return sodium.from_base64(ciphertext).buffer
+    .then (msg_bytes) =>
+      user_id = event.from
+      client_id = event.data.sender
+
+      decrypted_message = undefined
+      session = @load_session user_id, client_id
+
+      if session
+        decrypted_message = session.decrypt msg_bytes
+      else
+        [session, decrypted_message] = @_session_from_message user_id, client_id, msg_bytes
+      @save_session session
+
+      return z.proto.GenericMessage.decode decrypted_message
+    .catch (decrypt_error) =>
+      # Get error information
+      receiving_client_id = event.data.recipient
+      remote_client_id = event.data.sender
+      remote_user_id = event.from
+
+      # Handle error
+      if decrypt_error instanceof Proteus.errors.DecryptError.DuplicateMessage or decrypt_error instanceof Proteus.errors.DecryptError.OutdatedMessage
+        # We don't need to show duplicate message errors to the user
         return
 
-      if event.type is z.event.Backend.CONVERSATION.OTR_ASSET_ADD
-        ciphertext = event.data.key
-      else if event.type is z.event.Backend.CONVERSATION.OTR_MESSAGE_ADD
-        ciphertext = event.data.text
-
-      primary_key = z.storage.StorageService.construct_primary_key event
-      @storage_repository.load_event_for_conversation primary_key
-      .then (loaded_event) =>
-        if loaded_event is undefined
-          resolve @_decrypt_message event, ciphertext
-        else
-          @logger.log @logger.levels.INFO, "Skipped decryption of event '#{event.type}' (#{primary_key}) because it was previously stored"
-          reject new z.cryptography.CryptographyError z.cryptography.CryptographyError::TYPE.PREVIOUSLY_STORED
-      .catch (decrypt_error) =>
-        # Get error information
-        receiving_client_id = event.data.recipient
-        remote_client_id = event.data.sender
-        remote_user_id = event.from
-
-        # Handle error
-        if decrypt_error instanceof Proteus.errors.DecryptError.DuplicateMessage or decrypt_error instanceof Proteus.errors.DecryptError.OutdatedMessage
-          # We don't need to show duplicate message errors to the user
-          return resolve [undefined, undefined]
-
-        else if decrypt_error instanceof Proteus.errors.DecryptError.InvalidMessage or decrypt_error instanceof Proteus.errors.DecryptError.InvalidSignature
-          # Session is broken, let's see what's really causing it...
-          session_id = @_construct_session_id remote_user_id, remote_client_id
-          @logger.log @logger.levels.ERROR,
-            "Session '#{session_id}' broken or out of sync. Reset the session and decryption is likely to work again.\r\n" +
-              "Try: wire.app.repository.cryptography.reset_session('#{remote_user_id}', '#{remote_client_id}');"
-
-          if decrypt_error instanceof Proteus.errors.DecryptError.InvalidMessage
-            @logger.log @logger.levels.ERROR,
-              "Message is for client ID '#{receiving_client_id}' and we have client ID '#{@current_client().id}'."
-
-        else if decrypt_error instanceof Proteus.errors.DecryptError.RemoteIdentityChanged
-          # Remote identity changed... Is there a man in the middle or do we mess up with clients?
-          session = @load_session remote_user_id, remote_client_id
-          remote_fingerprint = session.session.remote_identity.public_key.fingerprint()
-
-          message = "Fingerprints do not match: We expect this fingerprint '#{remote_fingerprint}' from user ID '#{remote_user_id}' with client ID '#{remote_client_id}'"
-          @logger.log @logger.levels.ERROR, message, session
-
-        # Show error in JS console
+      else if decrypt_error instanceof Proteus.errors.DecryptError.InvalidMessage or decrypt_error instanceof Proteus.errors.DecryptError.InvalidSignature
+        # Session is broken, let's see what's really causing it...
+        session_id = @_construct_session_id remote_user_id, remote_client_id
         @logger.log @logger.levels.ERROR,
-          "Decryption of '#{event.type}' (#{primary_key}) failed: #{decrypt_error.message}", {
-            error: decrypt_error,
-            event: event
-          }
+          "Session '#{session_id}' broken or out of sync. Reset the session and decryption is likely to work again.\r\n" +
+            "Try: wire.app.repository.cryptography.reset_session('#{remote_user_id}', '#{remote_client_id}');"
 
-        # Report error to Localytics and Raygun
-        hashed_error_message = z.util.murmurhash3 decrypt_error.message, 42
-        error_code = hashed_error_message.toString().substr 0, 4
-        @_report_decrypt_error event, decrypt_error, error_code
+        if decrypt_error instanceof Proteus.errors.DecryptError.InvalidMessage
+          @logger.log @logger.levels.ERROR,
+            "Message is for client ID '#{receiving_client_id}' and we have client ID '#{@current_client().id}'."
 
-        unable_to_decrypt_event =
-          conversation: event.conversation
-          id: z.util.create_random_uuid()
-          type: z.event.Client.CONVERSATION.UNABLE_TO_DECRYPT
-          from: remote_user_id
-          time: event.time
-          error: "#{decrypt_error.message} (#{remote_client_id})"
-          error_code: "#{error_code} (#{remote_client_id})"
+      else if decrypt_error instanceof Proteus.errors.DecryptError.RemoteIdentityChanged
+        # Remote identity changed... Is there a man in the middle or do we mess up with clients?
+        session = @load_session remote_user_id, remote_client_id
+        remote_fingerprint = session.session.remote_identity.public_key.fingerprint()
 
-        # Show error message in message view
-        amplify.publish z.event.WebApp.EVENT.INJECT, unable_to_decrypt_event
+        message = "Fingerprints do not match: We expect this fingerprint '#{remote_fingerprint}' from user ID '#{remote_user_id}' with client ID '#{remote_client_id}'"
+        @logger.log @logger.levels.ERROR, message, session
 
-        resolve [undefined, undefined]
+      # Show error in JS console
+      @logger.log @logger.levels.ERROR,
+        "Decryption of '#{event.type}' (#{primary_key}) failed: #{decrypt_error.message}", {
+          error: decrypt_error,
+          event: event
+        }
+
+      # Report error to Localytics and Raygun
+      hashed_error_message = z.util.murmurhash3 decrypt_error.message, 42
+      error_code = hashed_error_message.toString().substr 0, 4
+      @_report_decrypt_error event, decrypt_error, error_code
+
+      unable_to_decrypt_event =
+        conversation: event.conversation
+        id: z.util.create_random_uuid()
+        type: z.event.Client.CONVERSATION.UNABLE_TO_DECRYPT
+        from: remote_user_id
+        time: event.time
+        error: "#{decrypt_error.message} (#{remote_client_id})"
+        error_code: "#{error_code} (#{remote_client_id})"
+
+      # Show error message in message view
+      amplify.publish z.event.WebApp.EVENT.INJECT, unable_to_decrypt_event
 
   ###
   Save an encrypted event.
@@ -576,27 +573,6 @@ class z.cryptography.CryptographyRepository
     .catch (error) =>
       @logger.log @logger.levels.ERROR, "Saving unencrypted message failed: #{error.message}", error
       throw error
-
-  ###
-  @return [z.proto.GenericMessage] Decrypted message in ProtocolBuffer format
-  ###
-  _decrypt_message: (event, ciphertext) =>
-    user_id = event.from
-    client_id = event.data.sender
-
-    session = @load_session user_id, client_id
-    msg_bytes = sodium.from_base64(ciphertext).buffer
-
-    decrypted_message = undefined
-
-    if session
-      decrypted_message = session.decrypt msg_bytes
-    else
-      [session, decrypted_message] = @_session_from_message user_id, client_id, msg_bytes
-
-    generic_message = z.proto.GenericMessage.decode decrypted_message
-    @save_session session
-    return generic_message
 
   ###
   Report decryption error to Localytics and stack traces to Raygun.
