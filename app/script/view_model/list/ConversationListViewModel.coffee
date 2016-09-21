@@ -127,6 +127,7 @@ class z.ViewModel.ConversationListViewModel
     amplify.subscribe z.event.WebApp.ARCHIVE.CLOSE, @_show
     amplify.subscribe z.event.WebApp.ARCHIVE.SHOW, @_hide
     amplify.subscribe z.event.WebApp.SEARCH.SHOW, @_hide
+    amplify.subscribe z.event.WebApp.SETTINGS.SHOW, @_hide
 
   _go_to_next_conversation: =>
     conversations = @conversation_repository.conversations_unarchived()
@@ -178,13 +179,8 @@ class z.ViewModel.ConversationListViewModel
   click_on_archived_button: ->
     amplify.publish z.event.WebApp.ARCHIVE.SHOW
 
-  click_on_settings_button: =>
-    if @is_self_profile_visible()
-      amplify.publish z.event.WebApp.PROFILE.HIDE
-      @is_self_profile_visible false
-    else
-      amplify.publish z.event.WebApp.PROFILE.SHOW
-      @is_self_profile_visible true
+  click_on_settings_button: ->
+    amplify.publish z.event.WebApp.SETTINGS.SHOW
 
   click_on_people_button: ->
     amplify.publish z.event.WebApp.SEARCH.SHOW

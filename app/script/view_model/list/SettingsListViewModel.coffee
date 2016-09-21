@@ -27,7 +27,7 @@ class z.ViewModel.SettingsListViewModel
     @is_settings_visible = ko.observable()
 
     @should_update_scrollbar = (ko.computed =>
-      return @is_archive_visible()
+      return @is_settings_visible()
     ).extend notify: 'always', rateLimit: 500
 
     @_init_subscriptions()
@@ -38,6 +38,16 @@ class z.ViewModel.SettingsListViewModel
     amplify.subscribe z.event.WebApp.SETTINGS.SHOW, @open
     amplify.subscribe z.event.WebApp.SEARCH.SHOW, @close
     amplify.subscribe z.event.WebApp.SETTINGS.CLOSE, @close
+
+  open: =>
+    $(document).on 'keydown.show_settings', (event) ->
+      amplify.publish z.event.WebApp.SETTINGS.CLOSE if event.keyCode is z.util.KEYCODE.ESC
+    @is_settings_visible Date.now()
+    @_show()
+
+  close: =>
+    $(document).off 'keydown.show_settings'
+    @_hide()
 
   ###############################################################################
   # Archive animations
