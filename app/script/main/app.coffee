@@ -117,6 +117,7 @@ class z.main.App
     view.settings                  = new z.ViewModel.SettingsViewModel 'self-settings', @repository.user, @repository.conversation, @repository.client, @repository.cryptography
     view.warnings                  = new z.ViewModel.WarningsViewModel 'warnings'
     view.modals                    = new z.ViewModel.ModalsViewModel 'modals'
+    view.settings_list             = new z.ViewModel.SettingsListViewModel 'settings'
 
     view.loading                   = new z.ViewModel.LoadingViewModel 'loading-screen', @repository.user
 

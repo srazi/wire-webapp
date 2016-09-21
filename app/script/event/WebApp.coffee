@@ -146,6 +146,9 @@ z.event.WebApp =
     BADGE:
       HIDE: 'wire.webapp.search.badge.hide'
       SHOW: 'wire.webapp.search.badge.show'
+  SETTINGS:
+    CLOSE: 'wire.webapp.settings.close'
+    SHOW: 'wire.webapp.settings.show'
   SIGN_OUT: 'wire.webapp.logout'
   SYSTEM_NOTIFICATION:
     CLICK: 'wire.webapp.system-notification.click'
