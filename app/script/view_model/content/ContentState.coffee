@@ -18,22 +18,11 @@
 
 window.z ?= {}
 z.ViewModel ?= {}
-z.ViewModel.list ?= {}
+z.ViewModel.content ?= {}
 
 
-class z.ViewModel.list.SettingsListViewModel
-  ###
-  @param element_id [String] HTML selector
-  @param list_view_model [z.ViewModel.list.ListViewModel] List view model
-  ###
-  constructor: (element_id, @list_view_model) ->
-    @logger = new z.util.Logger 'z.ViewModel.listSettingsListViewModel', z.config.LOGGER.OPTIONS
-
-    @should_update_scrollbar = (ko.computed =>
-      return @list_view_model.last_update()
-    ).extend notify: 'always', rateLimit: 500
-
-    ko.applyBindings @, document.getElementById element_id
-
-  click_on_close_settings: =>
-    @list_view_model.switch_list z.ViewModel.list.LIST_STATE.CONVERSATIONS
+z.ViewModel.content.CONTENT_STATE =
+  BLANK: ''
+  CONVERSATION: 'z.ViewModel.content.CONTENT_STATE.CONVERSATION'
+  CONNECTION_REQUESTS: 'z.ViewModel.content.CONTENT_STATE.CONNECTION_REQUESTS'
+  PROFILE: 'z.ViewModel.content.CONTENT_STATE.PROFILE'

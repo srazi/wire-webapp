@@ -18,55 +18,36 @@
 
 window.z ?= {}
 z.ViewModel ?= {}
+z.ViewModel.list ?= {}
 
 
-class z.ViewModel.ArchiveViewModel
-  constructor: (element_id, @conversation_repository) ->
-    @logger = new z.util.Logger 'z.ViewModel.ArchiveViewModel', z.config.LOGGER.OPTIONS
+class z.ViewModel.list.ArchiveViewModel
+  ###
+  @param element_id [String] HTML selector
+  @param list_view_model [z.ViewModel.list.ListViewModel] List view model
+  @param conversation_repository [z.conversation.ConversationRepository] Conversation repository
+  ###
+  constructor: (element_id, @list_view_model, @conversation_repository) ->
+    @logger = new z.util.Logger 'z.ViewModel.list.ArchiveViewModel', z.config.LOGGER.OPTIONS
 
     @conversations_archived = @conversation_repository.conversations_archived
-    @is_archive_visible = ko.observable()
 
     @should_update_scrollbar = (ko.computed =>
-      return @is_archive_visible()
+      return @list_view_model.last_update()
     ).extend notify: 'always', rateLimit: 500
-
-    @_init_subscriptions()
 
     ko.applyBindings @, document.getElementById element_id
 
-  _init_subscriptions: =>
-    amplify.subscribe z.event.WebApp.ARCHIVE.SHOW, @open
-    amplify.subscribe z.event.WebApp.SEARCH.SHOW, @close
-    amplify.subscribe z.event.WebApp.ARCHIVE.CLOSE, @close
+  click_on_actions: (conversation_et, event) =>
+    @list_view_model.actions.click_on_actions conversation_et, event
 
-  click_on_actions: (conversation_et, event) ->
-    amplify.publish z.event.WebApp.ACTION.SHOW, conversation_et, event
-
-  click_on_close_archive: ->
-    amplify.publish z.event.WebApp.ARCHIVE.CLOSE
+  click_on_close_archive: =>
+    @list_view_model.switch_list z.ViewModel.list.LIST_STATE.CONVERSATIONS
 
   click_on_archived_conversation: (conversation_et) =>
     @conversation_repository.unarchive_conversation conversation_et
+    @list_view_model.switch_list z.ViewModel.list.LIST_STATE.CONVERSATIONS
     amplify.publish z.event.WebApp.CONVERSATION.SHOW, conversation_et
-    amplify.publish z.event.WebApp.ARCHIVE.CLOSE
 
-  open: =>
-    $(document).on 'keydown.show_archive', (event) ->
-      amplify.publish z.event.WebApp.ARCHIVE.CLOSE if event.keyCode is z.util.KEYCODE.ESC
+  update_list: =>
     @conversation_repository.update_conversations @conversation_repository.conversations_archived()
-    @is_archive_visible Date.now()
-    @_show()
-
-  close: =>
-    $(document).off 'keydown.show_archive'
-    @_hide()
-
-###############################################################################
-# Archive animations
-###############################################################################
-  _show: ->
-    $('#archive').addClass 'archive-is-visible'
-
-  _hide: ->
-    $('#archive').removeClass 'archive-is-visible'

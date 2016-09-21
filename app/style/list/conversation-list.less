@@ -30,12 +30,12 @@
     padding-top: 40px;
   }
 
-  &:not(.conversation-list-is-hidden) {
-    .start-ui-transition-fadein();
+  &:not(.left-list-is-visible) {
+    .start-ui-transition-fadeout();
   }
 
-  &.conversation-list-is-hidden {
-    .start-ui-transition-fadeout();
+  &.left-list-is-visible {
+    .start-ui-transition-fadein();
   }
 }
 

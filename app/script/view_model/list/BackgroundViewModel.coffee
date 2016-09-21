@@ -21,7 +21,7 @@ z.ViewModel ?= {}
 
 
 class z.ViewModel.BackgroundViewModel
-  constructor: (element_id, @content, @conversation_repository, @user_repository) ->
+  constructor: (element_id, @content_view_model, @conversation_repository, @user_repository) ->
 
     @webapp_loaded = ko.observable false
 
@@ -33,8 +33,8 @@ class z.ViewModel.BackgroundViewModel
       if not $(@).hasClass 'background-fullscreen'
         $('.conversation, .connect-requests-wrapper').css 'z-index': ''
 
-    @content.state.subscribe =>
-      if @content.state() is z.ViewModel.CONTENT_STATE.PROFILE
+    @content_view_model.state.subscribe =>
+      if @content_view_model.state() is z.ViewModel.content.CONTENT_STATE.PROFILE
         requestAnimFrame =>
           @background_list_element.addClass 'background-fullscreen'
           requestAnimFrame =>

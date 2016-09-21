@@ -20,13 +20,12 @@
         #include('list/actions.htm')
       </div>
       <div id="right" class="right">
-        <!-- ko if: state() === z.ViewModel.CONTENT_STATE.PENDING -->
+        <!-- ko if: state() === z.ViewModel.content.CONTENT_STATE.CONNECTION_REQUESTS -->
           #include('conversation/connect-requests.htm')
         <!-- /ko -->
-        <!-- ko if: state() === z.ViewModel.CONTENT_STATE.CONVERSATION -->
+        <!-- ko if: state() === z.ViewModel.content.CONTENT_STATE.CONVERSATION -->
           #include('conversation/conversation.htm')
         <!-- /ko -->
-        #include('self/self-profile.htm')
       </div>
       <div id="welcome" class="welcome" data-bind="visible: show_welcome()">
         <div class="welcome-inner">

@@ -21,8 +21,6 @@ z.event ?= {}
 
 # Enum of diffent webapp events.
 z.event.WebApp =
-  ACTION:
-    SHOW: 'wire.webapp.action.show'
   ANALYTICS:
     EVENT: 'wire.webapp.analytics.event'
     INIT: 'wire.webapp.analytics.init'
@@ -37,9 +35,6 @@ z.event.WebApp =
     UPDATE_INIT: 'wire.webapp.app.update-init'
     HIDE: 'wire.webapp.app.hide'
     FADE_IN: 'wire.webapp.app.fade-in'
-  ARCHIVE:
-    SHOW: 'wire.webapp.archive.show'
-    CLOSE: 'wire.webapp.archive.close'
   CALL:
     EVENT_FROM_BACKEND: 'wire.webapp.call.event-from-backend'
     STATE:
@@ -87,10 +82,6 @@ z.event.WebApp =
       EDIT: 'wire.webapp.conversation.message.edit'
     IMAGE:
       SEND: 'wire.webapp.conversation.image.send'
-  CONVERSATION_LIST:
-    SHOW: 'wire.webapp.conversation-list.show'
-    ARCHIVE:
-      HIDE: 'wire.webapp.conversation-list.archive.hide'
   CONTEXT_MENU: 'wire.webapp.context-menu'
   DEBUG:
     UPDATE_LAST_CALL_STATUS: 'wire.webapp.debug.update-last-call-status'
@@ -146,9 +137,6 @@ z.event.WebApp =
     BADGE:
       HIDE: 'wire.webapp.search.badge.hide'
       SHOW: 'wire.webapp.search.badge.show'
-  SETTINGS:
-    CLOSE: 'wire.webapp.settings.close'
-    SHOW: 'wire.webapp.settings.show'
   SIGN_OUT: 'wire.webapp.logout'
   SYSTEM_NOTIFICATION:
     CLICK: 'wire.webapp.system-notification.click'

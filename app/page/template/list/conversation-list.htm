@@ -1,5 +1,5 @@
 <!--@formatter:off-->
-<div id="conversation-list" class="conversation-list">
+<div id="conversation-list" class="conversation-list left-list-is-visible">
 
   <!-- ko foreach: conversations_calls -->
     <div class="conversation-list-call" data-bind="attr: {'data-uie-value': $root.status.call}" data-uie-name="status-call">
@@ -40,7 +40,7 @@
              data-bind="click: $root.click_on_conversation">
           <div class="name"
                data-bind="attr: {'data-uie-uid': id, 'data-uie-value': display_name()},
-                          css: {'text-theme': $root.selected_list_item() === 'conversation' && id === $root.active_conversation_id()},
+                          css: {'text-theme': $root.selected_list_item() === z.ViewModel.content.CONTENT_STATE.CONVERSATION && id === $root.active_conversation_id()},
                           text: display_name()"
                data-uie-name="item-call"></div>
           <!-- ko ifnot: call().is_declined() -->
@@ -161,7 +161,7 @@
 
       <!-- ko if: connect_requests().length > 0 -->
         <li class="conversation-list-item conversation-list-item-requests"
-            data-bind="css: {'text-theme': $root.selected_list_item() === 'pending'}">
+            data-bind="css: {'text-theme': $root.selected_list_item() === z.ViewModel.content.CONTENT_STATE.CONNECTION_REQUESTS}">
           <div class="left-column">
             <div class="dot-md dot-outlined border-theme"></div>
           </div>
@@ -174,7 +174,7 @@
 
       <!-- ko foreach: conversations_unarchived -->
         <li class="conversation-list-item"
-          data-bind="css: {'text-theme': $root.selected_list_item() === 'conversation' && id === $root.active_conversation_id()}">
+          data-bind="css: {'text-theme': $root.selected_list_item() === z.ViewModel.content.CONTENT_STATE.CONVERSATION && id === $root.active_conversation_id()}">
           <div class="overlay"></div>
           <div class="left-column">
             <!-- ko if: unread_type() === z.conversation.ConversationUnreadType.UNREAD -->
@@ -233,7 +233,7 @@
     <!-- ko if: conversations_archived().length > 0 -->
       <span class="button-icon-large icon-archive" data-bind="attr: {title: $root.archive_tooltip}, click: $root.click_on_archived_button" data-uie-name="go-archive"></span>
     <!-- /ko -->
-    <span class="conversation-list-settings button-icon-large icon-settings" data-bind="css: {'text-theme': is_self_profile_visible}, click: $root.click_on_settings_button" data-uie-name="go-self-profile">
+    <span class="conversation-list-settings button-icon-large icon-settings" data-bind="click: $root.click_on_settings_button" data-uie-name="go-self-profile">
       <!-- ko if: show_badge() -->
        <span class="conversation-list-settings-badge bg-theme"></span>
       <!-- /ko -->

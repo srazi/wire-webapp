@@ -45,7 +45,7 @@ class z.ViewModel.WindowTitleViewModel
       amplify.publish z.event.WebApp.CONVERSATION.UNREAD, badge_count
 
       switch @content_state()
-        when z.ViewModel.CONTENT_STATE.PENDING
+        when z.ViewModel.content.CONTENT_STATE.CONNECTION_REQUESTS
           if number_of_connect_requests > 1
             window_title += z.localization.Localizer.get_text {
               id: z.string.conversation_list_many_connection_request
@@ -53,9 +53,9 @@ class z.ViewModel.WindowTitleViewModel
             }
           else
             window_title += z.localization.Localizer.get_text z.string.conversation_list_one_connection_request
-        when z.ViewModel.CONTENT_STATE.CONVERSATION
+        when z.ViewModel.content.CONTENT_STATE.CONVERSATION
           window_title += @conversation_repository.active_conversation()?.display_name()
-        when z.ViewModel.CONTENT_STATE.PROFILE
+        when z.ViewModel.content.CONTENT_STATE.PROFILE
           window_title += @user_repository.self().name()
 
       if window_title is ''

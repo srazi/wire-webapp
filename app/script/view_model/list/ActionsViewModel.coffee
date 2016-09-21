@@ -18,11 +18,19 @@
 
 window.z ?= {}
 z.ViewModel ?= {}
+z.ViewModel.list ?= {}
 
 
-class z.ViewModel.ActionsViewModel
-  constructor: (element_id, @conversation_repository, @user_repository, @conversation_list) ->
-    @logger = new z.util.Logger 'z.ViewModel.ActionsViewModel', z.config.LOGGER.OPTIONS
+class z.ViewModel.list.ActionsViewModel
+  ###
+  @param element_id [String] HTML selector
+  @param list_view_model [z.ViewModel.list.ListViewModel] List view model
+  @param conversation_list_view_model [z.ViewModel.list.ConversationListViewModel] Conversation list view model
+  @param conversation_repository [z.conversation.ConversationRepository] Conversation repository
+  @param user_repository [z.user.UserRepository] User repository
+  ###
+  constructor: (element_id, @list_view_model, @conversation_list_view_model, @conversation_repository, @user_repository) ->
+    @logger = new z.util.Logger 'z.ViewModel.list.ActionsViewModel', z.config.LOGGER.OPTIONS
 
     @action_bubbles = {}
     @selected_conversation = ko.observable()
@@ -43,13 +51,13 @@ class z.ViewModel.ActionsViewModel
     }
 
     # fix for older wrapper versions
-    @conversation_list.click_on_archive_action = @click_on_archive_action
-    @conversation_list.click_on_block_action = @click_on_block_action
-    @conversation_list.click_on_cancel_action = @click_on_cancel_action
-    @conversation_list.click_on_clear_action = @click_on_clear_action
-    @conversation_list.click_on_leave_action = @click_on_leave_action
-    @conversation_list.click_on_mute_action = @click_on_mute_action
-    @conversation_list.selected_conversation = @selected_conversation
+    @conversation_list_view_model.click_on_archive_action = @click_on_archive_action
+    @conversation_list_view_model.click_on_block_action = @click_on_block_action
+    @conversation_list_view_model.click_on_cancel_action = @click_on_cancel_action
+    @conversation_list_view_model.click_on_clear_action = @click_on_clear_action
+    @conversation_list_view_model.click_on_leave_action = @click_on_leave_action
+    @conversation_list_view_model.click_on_mute_action = @click_on_mute_action
+    @conversation_list_view_model.selected_conversation = @selected_conversation
 
     @_init_subscriptions()
 
@@ -58,7 +66,6 @@ class z.ViewModel.ActionsViewModel
   _init_subscriptions: =>
     amplify.subscribe z.event.WebApp.SHORTCUT.ARCHIVE, @click_on_archive_action
     amplify.subscribe z.event.WebApp.SHORTCUT.SILENCE, @click_on_mute_action
-    amplify.subscribe z.event.WebApp.ACTION.SHOW, @click_on_actions
 
   click_on_actions: (conversation_et, event) =>
     @selected_conversation conversation_et
@@ -124,13 +131,14 @@ class z.ViewModel.ActionsViewModel
     @_click_on_action()
     .then (conversation_et) =>
       @conversation_repository.unarchive_conversation conversation_et, =>
-        amplify.publish z.event.WebApp.ARCHIVE.CLOSE if @conversation_repository.conversations_archived().length is 0
+        if not @conversation_repository.conversations_archived().length
+          @list_view_model.switch_list z.ViewModel.list.LIST_STATE.CONVERSATIONS
 
   _click_on_action: =>
     return new Promise (resolve) =>
       conversation_et = @selected_conversation() or @conversation_repository.active_conversation()
       if conversation_et
-        amplify.publish z.event.WebApp.ARCHIVE.CLOSE if not conversation_et.is_archived()
+        @list_view_model.switch_list z.ViewModel.list.LIST_STATE.CONVERSATIONS if not conversation_et.is_archived()
         @action_bubbles[conversation_et.id]?.hide()
         @selected_conversation null
         resolve conversation_et

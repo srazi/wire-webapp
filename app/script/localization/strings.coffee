@@ -266,6 +266,9 @@ z.string.conversation_delete_timestamp = 'Deleted on %@timestamp'
 z.string.conversation_edit_timestamp = 'Edited on %@timestamp'
 z.string.conversation_likes_caption = '%@number people'
 
+# Archive
+z.string.archive_header = "Archive"
+
 # Conversation list
 z.string.conversation_list_empty_conversation = 'Empty conversation'
 z.string.conversation_list_many_connection_request = '%no people waiting'

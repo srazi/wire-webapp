@@ -26,7 +26,7 @@ describe 'z.ViewModel.WindowTitleViewModel', ->
   beforeEach (done) ->
     test_factory.exposeConversationActors()
     .then (conversation_repository) ->
-      state = ko.observable z.ViewModel.CONTENT_STATE.CONVERSATION
+      state = ko.observable z.ViewModel.content.CONTENT_STATE.CONVERSATION
       title_view_model = new z.ViewModel.WindowTitleViewModel state, window.user_repository, conversation_repository
       title_view_model.logger.level = z.util.Logger::levels.ERROR
       done()
@@ -39,7 +39,7 @@ describe 'z.ViewModel.WindowTitleViewModel', ->
       expect(window.document.title).toBe suffix
 
     it 'sets the name of the self user when opening the settings', ->
-      title_view_model.content_state z.ViewModel.CONTENT_STATE.PROFILE
+      title_view_model.content_state z.ViewModel.content.CONTENT_STATE.PROFILE
       user_name = window.user_repository.self().name()
 
       expected_title = "#{user_name} - #{suffix}"
@@ -130,7 +130,7 @@ describe 'z.ViewModel.WindowTitleViewModel', ->
       expect(window.document.title).toBe expected_title
 
     it 'sets the name of the self user when opening the settings', ->
-      title_view_model.content_state z.ViewModel.CONTENT_STATE.PROFILE
+      title_view_model.content_state z.ViewModel.content.CONTENT_STATE.PROFILE
       user_name = window.user_repository.self().name()
 
       expected_title = "#{user_name} - #{suffix}"
@@ -138,7 +138,7 @@ describe 'z.ViewModel.WindowTitleViewModel', ->
       expect(window.document.title).toBe expected_title
 
     it 'shows the number of connection requests when viewing the inbox', ->
-      title_view_model.content_state z.ViewModel.CONTENT_STATE.PENDING
+      title_view_model.content_state z.ViewModel.content.CONTENT_STATE.CONNECTION_REQUESTS
 
       pending_connection = new z.entity.Connection()
       pending_connection.status z.user.ConnectionStatus.PENDING

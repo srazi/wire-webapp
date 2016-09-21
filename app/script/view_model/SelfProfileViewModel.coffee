@@ -34,7 +34,7 @@ class z.ViewModel.SelfProfileViewModel
     @logger = new z.util.Logger 'z.ViewModel.SelfProfileViewModel', z.config.LOGGER.OPTIONS
 
     @user = @user_repository.self
-    @settings_bubble = new zeta.webapp.module.Bubble host_selector: '#show-settings'
+    #@settings_bubble = new zeta.webapp.module.Bubble host_selector: '#show-settings'
 
     @new_clients = ko.observableArray()
 
