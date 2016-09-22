@@ -1086,9 +1086,9 @@ class z.conversation.ConversationRepository
 
       # we don't need to wait for the sending to resolve
       @_add_to_sending_queue conversation_et.id, generic_message
-      .then =>
+      .then (response) =>
         if saved_event.type in z.event.EventTypeHandling.STORE
-          @_update_message_sent_status conversation_et, saved_event.id
+          @_update_message_sent_status conversation_et, saved_event.id, response.time
 
       return saved_event
 
@@ -1096,14 +1096,18 @@ class z.conversation.ConversationRepository
   Update message as sent in db and view
   @param conversation_et [z.entity.Conversation]
   @param message_id [String]
+  @param sent_time [String] ISO-8601 formatted date String
   @return [Promise]
   ###
-  _update_message_sent_status: (conversation_et, message_id) =>
+  _update_message_sent_status: (conversation_et, message_id, sent_time) =>
     @get_message_in_conversation_by_id conversation_et, message_id
     .then (message_et) =>
-      changes = status: z.message.StatusType.SENT
       message_et.status z.message.StatusType.SENT
-      @conversation_service.update_message_in_db message_et, changes
+      message_et.sent_timestamp new Date(sent_time).getTime()
+
+      @conversation_service.update_message_in_db message_et,
+        sent_time: sent_time
+        status: z.message.StatusType.SENT
 
   ###
   Send encrypted external message

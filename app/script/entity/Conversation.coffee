@@ -92,7 +92,11 @@ class z.entity.Conversation
     ###############################################################################
 
     @messages_unordered = ko.observableArray()
-    @messages = ko.pureComputed => @messages_unordered().sort (a, b) -> a.timestamp - b.timestamp
+    @messages = (ko.pureComputed => @messages_unordered().sort (a, b) ->
+      console.debug 'sort'
+      return a.actual_timestamp() - b.actual_timestamp()
+    ).extend rateLimit: 200
+
     @messages.subscribe => @update_latest_from_message @get_last_message()
 
     @creation_message = undefined

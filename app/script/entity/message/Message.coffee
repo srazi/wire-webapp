@@ -40,6 +40,10 @@ class z.entity.Message
     @visible = ko.observable true
     @is_editing = ko.observable false
     @status = ko.observable z.message.StatusType.UNSPECIFIED
+    @sent_timestamp = ko.observable()
+
+    @actual_timestamp = ko.pureComputed =>
+      return @sent_timestamp() or @timestamp
 
     @display_timestamp_short = =>
       date = moment.unix @timestamp / 1000

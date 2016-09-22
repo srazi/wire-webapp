@@ -90,6 +90,7 @@ class z.conversation.EventMapper
     message_et.id = event.id
     message_et.from = event.from
     message_et.timestamp = new Date(event.time).getTime()
+    message_et.sent_timestamp new Date(event.sent_time).getTime()
     message_et.primary_key = z.storage.StorageService.construct_primary_key event
     message_et.type = event.type
 
