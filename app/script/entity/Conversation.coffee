@@ -92,10 +92,8 @@ class z.entity.Conversation
     ###############################################################################
 
     @messages_unordered = ko.observableArray()
-    @messages = (ko.pureComputed => @messages_unordered().sort (a, b) ->
-      console.debug 'sort'
+    @messages = ko.pureComputed => @messages_unordered().sort (a, b) ->
       return a.actual_timestamp() - b.actual_timestamp()
-    ).extend rateLimit: 200
 
     @messages.subscribe => @update_latest_from_message @get_last_message()
 
@@ -464,6 +462,15 @@ class z.entity.Conversation
   ###
   get_last_message: ->
     return @messages()[@messages().length - 1]
+
+  ###
+  Get the previous message for give message.
+  @return [z.entity.Message, undefined]
+  ###
+  get_previous_message: (message_et) ->
+    messages_visible = @messages_visible()
+    message_index = messages_visible.indexOf message_et
+    return messages_visible[message_index - 1] if message_index > 0
 
   ###
   Get the last text message that was added by self user.
