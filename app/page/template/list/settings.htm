@@ -1,10 +1,23 @@
 <div id="settings" class="left-list left-list-settings">
   <div class="left-list-header">
-    <span class="label-bold-xs">Prefs</span>
+    <span class="label-bold-xs" data-bind="l10n_text: z.string.preferences_headline"></span>
     <span class="left-list-header-close-button button-icon-large icon-close" data-uie-name="do-close-settings" data-bind="click: click_on_close_settings"></span>
   </div>
   <div class="settings-center">
-    <div><span class="icon-screensharing"
-    </div>
+    <ul class="settings-list-options">
+      <li data-bind="l10n_text: z.string.preferences_account" data-uie-name="go-account"></li>
+      <li data-bind="l10n_text: z.string.preferences_devices" data-uie-name="go-devices"></li>
+      <li data-bind="l10n_text: z.string.preferences_options" data-uie-name="go-options"></li>
+      <li data-bind="l10n_text: z.string.preferences_support" data-uie-name="go-support"></li>
+      <li data-bind="l10n_text: z.string.preferences_about" data-uie-name="go-about"></li>
+    </ul>
+
+    <div class="button-icon-large icon-account"><span data-bind="l10n_text: z.string.preferences_account"></span></div>
+    <div class="button-icon-large icon-devices"><span data-bind="l10n_text: z.string.preferences_devices"></span></div>
+    <div class="button-icon-large icon-options"><span data-bind="l10n_text: z.string.preferences_options"></span></div>
+    <!-- ko ifnot: z.util.Environment.electron -->
+      <div class="button-icon-large icon-support"><span data-bind="l10n_text: z.string.preferences_support"></span></div>
+      <div class="button-icon-large icon-wire"><span data-bind="l10n_text: z.string.preferences_about"></span></div>
+    <!-- /ko -->
   </div>
 </div>

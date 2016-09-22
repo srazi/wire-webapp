@@ -372,13 +372,21 @@ z.string.people_button_no = 'No'
 z.string.people_button_yes = 'Yes'
 
 # Preferences
-z.string.preferences_headline = 'Settings'
+z.string.preferences_about = 'About'
 z.string.preferences_account = 'Account'
+z.string.preferences_devices = 'Devices'
+z.string.preferences_headline = 'Settings'
+z.string.preferences_options = 'Options'
+z.string.preferences_support = 'Support'
+
+z.string.preferences_account_username_placeholder = 'Your full name'
+
 z.string.preferences_password = 'Password'
 z.string.preferences_password_reset = 'Reset Password'
 z.string.preferences_delete = 'Delete Account'
 z.string.preferences_email_sent = 'Email Sent'
 z.string.preferences_delete_info = 'We will send an email to %email. Follow the link to permanently delete your account.'
+z.string.profile_sign_out = 'Log out'
 
 z.string.preferences_contacts = 'Contacts'
 z.string.preferences_share_contacts = 'Import from Gmail'
@@ -405,13 +413,6 @@ z.string.preferences_device_reset_session_description = 'If fingerprints don’t
 z.string.preferences_device_reset_session_button = 'Reset session'
 z.string.preferences_device_fingerprint_label = 'Key fingerprint'
 z.string.preferences_device_fingerprint_message = 'Wire gives every device a unique fingerprint. Compare fingerprints to verify your devices and conversations.'
-
-# Profile
-z.string.profile_about = 'About'
-z.string.profile_preferences = 'Settings'
-z.string.profile_sign_out = 'Log out'
-z.string.profile_support = 'Support'
-z.string.profile_username_placeholder = 'Your full name'
 
 # Search
 z.string.search_group_hint = 'Keep typing or pick more people to create a group'

@@ -227,7 +227,7 @@
     <span class="button-icon-large" data-bind="attr: {title: $root.start_tooltip}, click: $root.click_on_people_button" data-uie-name="go-people">
       <div class="icon-people"></div>
       <!-- ko if: conversations_archived().length === 0 -->
-        <span class="conversation-list-footer-contacts-label label-xs" data-bind="l10n_text: z.string.preferences_contacts"></span>
+        <span class="conversation-list-footer-contacts-label" data-bind="l10n_text: z.string.preferences_contacts"></span>
       <!-- /ko -->
     </span>
     <!-- ko if: conversations_archived().length > 0 -->
